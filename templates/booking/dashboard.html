@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>Dashboard</h1>
+    <div>
+        {% if user.role == 'MANAGER' or user.role == 'RECEPTIONIST' %}
+        <a href="{% url 'customer_add' %}" class="btn btn-primary">New Customer</a>
+        {% endif %}
+        {% if user.role == 'MANAGER' %}
+        <a href="{% url 'room_add' %}" class="btn btn-primary">New Room</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="features" style="grid-template-columns: 1fr 1fr;">
+    <div class="card" style="grid-column: span 2;">
+        <h2>Quick Booking</h2>
+        <form id="bookingForm">
+            {% csrf_token %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Customer</label>
+                    <select name="customer" required>
+                        <option value="">Select Customer</option>
+                        {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Room</label>
+                    <select name="room" required>
+                        <option value="">Select Room</option>
+                        {% for room in rooms %}
+                        <option value="{{ room.id }}">{{ room.number }} - {{ room.room_type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Check In</label>
+                    <input type="date" name="check_in" required>
+                </div>
+                <div class="form-group">
+                    <label>Check Out</label>
+                    <input type="date" name="check_out" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Booking</button>
+        </form>
+        <div id="bookingMessage" style="margin-top: 1rem;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Recent Bookings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Room</th>
+                    <th>Customer</th>
+                    <th>Dates</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings|slice:":5" %}
+                <tr>
+                    <td>{{ booking.room.number }}</td>
+                    <td>{{ booking.customer.name }}</td>
+                    <td>{{ booking.check_in|date:"M d" }} - {{ booking.check_out|date:"M d" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Management</h2>
+        <div style="display: flex; gap: 1rem; flex-direction: column;">
+            <a href="{% url 'room_list' %}" class="btn" style="border: 1px solid var(--glass-border);">Manage Rooms</a>
+            <a href="{% url 'customer_list' %}" class="btn" style="border: 1px solid var(--glass-border);">Manage
+                Customers</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            customer: formData.get('customer'),
+            room: formData.get('room'),
+            check_in: formData.get('check_in'),
+            check_out: formData.get('check_out')
+        };
+
+        try {
+            const response = await fetch("{% url 'api_create_booking' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            const msgDiv = document.getElementById('bookingMessage');
+
+            if (result.status === 'success') {
+                msgDiv.innerHTML = `<div class="alert alert-success" style="color: lightgreen;">${result.message}</div>`;
+                setTimeout(() => location.reload(), 1500); // Reload to show in list
+            } else {
+                msgDiv.innerHTML = `<div class="alert alert-error" style="color: #ff6b6b;">${result.message}</div>`;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('bookingMessage').innerHTML = `<div class="alert alert-error" style="color: #ff6b6b;">An error occurred.</div>`;
+        }
+    });
+</script>
+{% endblock %}

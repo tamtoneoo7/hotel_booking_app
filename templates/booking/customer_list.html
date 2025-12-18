@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Customers</h2>
+        {% if user.role == 'MANAGER' or user.role == 'RECEPTIONIST' %}
+        <a href="{% url 'customer_add' %}" class="btn btn-primary">Add Customer</a>
+        {% endif %}
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.get_gender_display }}</td>
+                <td>
+                    {% if user.role == 'MANAGER' or user.role == 'RECEPTIONIST' %}
+                    <a href="{% url 'customer_edit' customer.pk %}" style="color: #667eea; margin-right: 1rem;">Edit</a>
+                    {% endif %}
+                    {% if user.role == 'MANAGER' %}
+                    <a href="{% url 'customer_delete' customer.pk %}" style="color: var(--accent);">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center;">No customers found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

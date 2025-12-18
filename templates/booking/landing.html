@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>LuxStay Hotels</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem; color: var(--text-muted);">Experience luxury and comfort like
+        never before. Managed excellence.</p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+    {% else %}
+    <a href="{% url 'login' %}" class="btn btn-primary">Staff Login</a>
+    {% endif %}
+</div>
+
+<div class="features">
+    <div class="card">
+        <h3>Premium Rooms</h3>
+        <p>Managed room inventory with real-time tracking.</p>
+    </div>
+    <div class="card">
+        <h3>Seamless Booking</h3>
+        <p>Instant booking creation with conflict detection.</p>
+    </div>
+    <div class="card">
+        <h3>Customer Focus</h3>
+        <p>Integrated customer management for personalized service.</p>
+    </div>
+</div>
+{% endblock %}

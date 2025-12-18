@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-container" style="max-width: 500px; margin: 4rem auto; text-align: center;">
+    <h2>Delete Customer</h2>
+    <p>Are you sure you want to delete customer "{{ object }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+            <a href="{% url 'customer_list' %}" class="btn"
+                style="margin-left: 1rem; border: 1px solid var(--glass-border);">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
